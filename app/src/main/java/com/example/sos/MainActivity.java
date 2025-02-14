@@ -59,13 +59,13 @@ public class MainActivity extends AppCompatActivity {
                 if (!isDialogVisible) {
                     fetchData();
                 }
-                handler.postDelayed(this, 3000);
+                handler.postDelayed(this, 2000);
             }
         }, 1000);
     }
 
     private void fetchData() {
-        int timeoutMs = 8000; // Increase timeout to 8 seconds
+        int timeoutMs = 8000;
         RetryPolicy retryPolicy = new DefaultRetryPolicy(
                 timeoutMs,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
