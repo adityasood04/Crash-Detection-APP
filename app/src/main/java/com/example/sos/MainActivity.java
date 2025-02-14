@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,9 +21,11 @@ import com.android.volley.toolbox.Volley;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView angleXText, angleYText;
+    private TextView angleXText, angleYText, tvMain;
+    private LinearLayout llOk;
     private Handler handler = new Handler();
     private String ESP_URL = "http://192.168.254.147/";
+    private String ESP_IP = "192.168.254.147";
     private RequestQueue requestQueue;
     private Handler sosHandler = new Handler();
     private Runnable sosRunnable;
@@ -38,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         angleXText = findViewById(R.id.angleXText);
         angleYText = findViewById(R.id.angleYText);
+        tvMain = findViewById(R.id.tvConnection);
+        llOk = findViewById(R.id.llFine);
         requestQueue = Volley.newRequestQueue(this);
         SOS_NUMBER = "+91" + getIntent().getStringExtra("PHONE");
         SOS_MESSAGE = "Emergency. Vehicle number " + getIntent().getStringExtra("VEHICLE") + " has crashed.";
@@ -50,11 +56,10 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!isDialogVisible) { // Fetch only when no alert is shown
+                if (!isDialogVisible) {
                     fetchData();
                 }
-//                fetchData();
-                handler.postDelayed(this, 3000); // Fetch every 3 seconds
+                handler.postDelayed(this, 3000);
             }
         }, 1000);
     }
@@ -71,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         double angleX = response.getDouble("angleX");
                         double angleY = response.getDouble("angleY");
-
-                        angleXText.setText("Angle X: " + angleX + "°");
-                        angleYText.setText("Angle Y: " + angleY + "°");
-
+                        tvMain.setText("Connected to device\nIP : "+ESP_IP);
+                        angleXText.setText("Tilt X: " + angleX + "°");
+                        angleYText.setText("Tilt Y: " + angleY + "°");
+                        llOk.setVisibility(View.VISIBLE);
                         if ((Math.abs(angleX) > 60 || Math.abs(angleY) > 60) && !isDialogVisible) {
                             showAlertDialog();
                         }
@@ -94,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
         new AlertDialog.Builder(this)
                 .setTitle("🚨 Vehicle Crashed! 🚨")
-                .setMessage("Sending SOS message in 6 seconds...\nPress 'Cancel' if this is a mistake.")
+                .setMessage("Sending SOS message in 5 seconds...\nPress 'Cancel' if this is a mistake.")
+                .setIcon(R.drawable.baseline_warning_24)
                 .setCancelable(false)
                 .setPositiveButton("Cancel SOS", (dialog, which) -> {
                     sosHandler.removeCallbacks(sosRunnable);
@@ -109,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 sendSOSMessage();
             }
         };
-        sosHandler.postDelayed(sosRunnable, 6000);
+        sosHandler.postDelayed(sosRunnable, 5000);
     }
 
     private void sendSOSMessage() {
